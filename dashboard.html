@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Dashboard Legales</title>
+
+<style>
+:root{
+  --bg:#f2f4f7;
+  --card:#ffffff;
+  --text:#1f2933;
+  --muted:#6b7280;
+  --primary:#1e88e5;
+  --border:#e5e7eb;
+  --danger:#fdecea;
+  --warning:#fff8e1;
+}
+
+*{ box-sizing:border-box }
+
+body{
+  margin:0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  padding:24px;
+}
+
+/* ===== HEADER ===== */
+.header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:20px;
+}
+
+.header-left{
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
+
+.header-left img{
+  height:52px;          /* 🔵 tamaño institucional */
+  width:auto;
+}
+
+.header-title{
+  display:flex;
+  flex-direction:column;
+}
+
+.header-title h1{
+  font-size:20px;
+  margin:0;
+}
+
+.header-title span{
+  font-size:13px;
+  color:var(--muted);
+}
+
+.logout{
+  background:#111827;
+}
+
+/* ===== UI GENERAL ===== */
+h2{ font-size:16px; margin-bottom:14px }
+h3,h4{ font-size:15px; margin:10px 0 }
+
+button{
+  background:var(--primary);
+  color:#fff;
+  border:none;
+  border-radius:6px;
+  padding:8px 14px;
+  cursor:pointer;
+  font-size:14px;
+}
+button:hover{ opacity:.9 }
+
+input, select, textarea{
+  width:100%;
+  padding:8px 10px;
+  border-radius:6px;
+  border:1px solid var(--border);
+  font-size:14px;
+}
+
+textarea{ resize:vertical }
+
+.box{
+  background:var(--card);
+  border-radius:10px;
+  padding:18px;
+  margin-bottom:20px;
+  box-shadow:0 4px 14px rgba(0,0,0,.05);
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:14px;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:14px;
+}
+th{
+  text-align:left;
+  color:var(--muted);
+  font-weight:500;
+  padding:10px;
+  border-bottom:1px solid var(--border);
+}
+td{
+  padding:10px;
+  border-bottom:1px solid var(--border);
+}
+tr:hover{ background:#f9fafb }
+
+.vencido{ background:var(--danger) }
+.por-vencer{ background:var(--warning) }
+
+/* ===== MODAL ===== */
+#modalEditar{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(17,24,39,.6);
+  padding:20px;
+}
+#modalEditar.activo{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+#modalContenido{
+  background:#fff;
+  width:720px;
+  max-width:95%;
+  height:70vh;
+  border-radius:12px;
+  padding:20px;
+  overflow-y:auto;
+  box-shadow:0 20px 50px rgba(0,0,0,.25);
+}
+
+.modal-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:12px;
+}
+.modal-header button{
+  background:#e5e7eb;
+  color:#111;
+}
+
+.section{ margin-bottom:18px }
+
+.archivo, .actualizacion{
+  font-size:13px;
+  padding:6px 0;
+  border-bottom:1px dashed var(--border);
+}
+label{
+  display:block;
+  font-size:13px;
+  font-weight:600;
+  color:var(--muted);
+  margin-bottom:4px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- ===== HEADER CON LOGO ===== -->
+<div class="header">
+  <div class="header-left">
+    <img src="CAB2.png" alt="Club Atlético Belgrano">
+    <div class="header-title">
+      <h1>Legales</h1>
+      <span>Gestión de Contratos</span>
+    </div>
+  </div>
+
+  <button id="btnLogout" class="logout">Cerrar sesión</button>
+</div>
+
+<!-- ALTA -->
+<div class="box">
+  <h3>➕ Nuevo contrato</h3>
+
+  <div class="grid">
+    <div>
+      <label>Nº de contrato</label>
+      <input id="numeroContrato">
+    </div>
+
+    <div>
+      <label>Proveedor</label>
+      <input id="proveedor">
+    </div>
+
+    <div>
+      <label>Tipo de contrato</label>
+      <select id="tipoContrato">
+    <option>Compraventa</option>
+    <option>Laborales</option>
+    <option>Servicios</option>
+    <option>Locaciones</option>
+    <option>Publicidad</option>
+    <option>Colaboración</option>
+    <option>Infraestructura</option>
+      </select>
+    </div>
+        <div>
+      <label>Fecha de Inicio</label>
+      <input type="date" id="fechaInicio">
+    </div>
+    <div>
+      <label>Fecha de vencimiento</label>
+      <input type="date" id="fechaVencimiento">
+    </div>
+    <div>
+    <label>Área</label>
+    <select id="area">
+    <option value="">Seleccionar área</option>
+    <option>Legal</option>
+    <option>Compras</option>
+    <option>Administración</option>
+    <option>Finanzas</option>
+    <option>RRHH</option>
+    <option>Otra</option>
+    </select>
+    </div>
+    <div>
+      <label>Estado</label>
+      <select id="estado">
+        <option>Borrador</option>
+        <option>Pendiente Firma</option>
+        <option>Firmado</option>
+      </select>
+    </div>
+        <div>
+      <label>Estudio Derivado</label>
+      <select id="estado">
+        <option>Manzanares</option>
+        <option>Trevisan</option>
+        <option>Altamira</option>
+        <option>Otro</option>
+      </select>
+    </div>
+  </div>
+
+  <div style="margin-top:12px">
+    <label>Observaciones</label>
+    <textarea id="observaciones"></textarea>
+  </div>
+
+  <button id="btnGuardar">Guardar</button>
+</div>
+
+<!-- LISTADO -->
+<div class="box">
+<h2>📋 Contratos</h2>
+<table>
+<thead>
+<tr>
+  <th>Nº</th>
+  <th>Proveedor</th>
+  <th>Tipo</th>
+  <th>Área</th>
+  <th>Vence</th>
+  <th>Estado</th>
+</tr>
+</thead>
+<tbody id="tabla"></tbody>
+</table>
+</div>
+
+<!-- MODAL -->
+<div id="modalEditar">
+<div id="modalContenido">
+
+<div class="modal-header">
+  <h3>Editar contrato</h3>
+  <button id="btnCerrarModal">Cerrar</button>
+</div>
+
+<div class="section">
+  <select id="editEstado">
+    <option>Borrador</option>
+    <option>Pendiente de Firma</option>
+    <option>Firmado</option>
+  </select>
+
+  <textarea id="editObservaciones" placeholder="Observaciones" style="margin-top:8px"></textarea>
+  <button id="btnGuardarEdicion" style="margin-top:8px">Guardar cambios</button>
+</div>
+
+<div class="section">
+  <h4>📎 Documentación adjunta</h4>
+  <input type="file" id="archivoAdjunto" accept=".pdf,.png,.jpg,.jpeg">
+  <button id="btnSubirArchivo">Subir archivo</button>
+  <div id="listaArchivos"></div>
+</div>
+
+<div class="section">
+  <h4>📝 Nueva actualización</h4>
+  <textarea id="nuevaActualizacion"></textarea>
+  <button id="btnAgregarActualizacion">Agregar actualización</button>
+</div>
+
+<div class="section">
+  <h4>📜 Historial</h4>
+  <div id="listaActualizaciones"></div>
+</div>
+
+</div>
+</div>
+
+
+
+<script type="module">
+let contratoActualId = null;
+const modal = document.getElementById("modalEditar");
+const btnCerrarModal = document.getElementById("btnCerrarModal");
+const tabla = document.getElementById("tabla");
+
+// ABRIR MODAL al hacer click en una fila
+tabla.addEventListener("click", (e) => {
+  const fila = e.target.closest("tr");
+  if (!fila) return;
+
+  modal.classList.add("activo");
+});
+
+// CERRAR MODAL
+btnCerrarModal.addEventListener("click", () => {
+  modal.classList.remove("activo");
+});
+</script>
+
+<script type="module" src="dashboard.js"></script>
+
+
+</body>
+</html>

@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Dashboard Legales</title>
+
+<style>
+:root{
+  --bg:#f2f4f7;
+  --card:#ffffff;
+  --text:#1f2933;
+  --muted:#6b7280;
+  --primary:#1e88e5;
+  --border:#e5e7eb;
+  --danger:#fdecea;
+  --warning:#fff8e1;
+}
+
+*{ box-sizing:border-box }
+
+body{
+  margin:0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  padding:24px;
+}
+
+/* HEADER */
+.header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:20px;
+}
+.header-left{
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
+.header-left img{
+  height:52px;
+}
+.logout{ background:#111827 }
+
+/* UI */
+button{
+  background:var(--primary);
+  color:#fff;
+  border:none;
+  border-radius:6px;
+  padding:8px 14px;
+  cursor:pointer;
+}
+input, select, textarea{
+  width:100%;
+  padding:8px;
+  border-radius:6px;
+  border:1px solid var(--border);
+}
+.box{
+  background:var(--card);
+  border-radius:10px;
+  padding:18px;
+  margin-bottom:20px;
+}
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:14px;
+}
+table{ width:100%; border-collapse:collapse }
+th,td{ padding:10px; border-bottom:1px solid var(--border) }
+.vencido{ background:var(--danger) }
+.por-vencer{ background:var(--warning) }
+
+/* MODAL */
+#modalEditar{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.6);
+}
+#modalEditar.activo{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+#modalContenido{
+  background:#fff;
+  width:720px;
+  max-width:95%;
+  height:70vh;
+  padding:20px;
+  border-radius:12px;
+  overflow-y:auto;
+}
+.archivo,.actualizacion{
+  font-size:13px;
+  border-bottom:1px dashed var(--border);
+  padding:6px 0;
+}
+label{
+  display:block;
+  font-size:13px;
+  font-weight:600;
+  color:var(--muted);
+  margin-bottom:4px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <img src="CAB2.png">
+    <div>
+      <strong>Legales</strong><br>
+      <small>Gestión de Contratos</small>
+    </div>
+  </div>
+  <button id="btnLogout" class="logout">Cerrar sesión</button>
+</div>
+
+<div class="box">
+  <h3>➕ Nuevo contrato</h3>
+
+  <div class="grid">
+    <div>
+      <label>Nº de contrato</label>
+      <input id="numeroContrato">
+    </div>
+
+    <div>
+      <label>Proveedor</label>
+      <input id="proveedor">
+    </div>
+
+    <div>
+    <label>Tipo de contrato</label>
+      <select id="tipoContrato">
+        <option>Compraventa</option>
+        <option>Laborales</option>
+        <option>Servicios</option>
+        <option>Locaciones</option>
+        <option>Publicidad</option>
+        <option>Colaboración</option>
+        <option>Infraestructura</option>
+      </select>
+    </div>
+    <div>
+      <label>Fecha de inicio</label>
+      <input type="date" id="fechaInicio">
+    </div>
+    <div>
+      <label>Fecha de vencimiento</label>
+      <input type="date" id="fechaVencimiento">
+    </div>
+    <div>
+    <label>Área</label>
+    <select id="area">
+    <option value="">Seleccionar área</option>
+    <option>Legal</option>
+    <option>Compras</option>
+    <option>Administración</option>
+    <option>Finanzas</option>
+    <option>RRHH</option>
+    <option>Otra</option>
+    </select>
+    </div>
+    <div>
+      <label>Estado</label>
+      <select id="estado">
+        <option>Borrador</option>
+        <option>Pendiente Firma</option>
+        <option>Firmado</option>
+      </select>
+    </div>
+        <div>
+      <label>Estudio Derivado</label>
+      <select id="estado">
+        <option>Manzanares</option>
+        <option>Trevisan</option>
+        <option>Altamira</option>
+        <option>Otro</option>
+      </select>
+    </div>
+  </div>
+
+  <div style="margin-top:12px">
+    <label>Observaciones</label>
+    <textarea id="observaciones"></textarea>
+  </div>
+
+  <button id="btnGuardar">Guardar</button>
+</div>
+
+
+<div class="box">
+<h3>📋 Contratos</h3>
+<table>
+<thead>
+<tr><th>Nº</th><th>Proveedor</th><th>Vence</th><th>Estado</th></tr>
+</thead>
+<tbody id="tabla"></tbody>
+</table>
+</div>
+
+<div id="modalEditar">
+<div id="modalContenido">
+<button id="btnCerrarModal">Cerrar</button>
+
+<select id="editEstado">
+  <option>Borrador</option><option>Firmado</option>
+</select>
+<textarea id="editObservaciones"></textarea>
+<button id="btnGuardarEdicion">Guardar cambios</button>
+
+<h4>📎 Adjuntos</h4>
+<input type="file" id="archivoAdjunto">
+<button id="btnSubirArchivo">Subir</button>
+<div id="listaArchivos"></div>
+
+<h4>📝 Actualizaciones</h4>
+<textarea id="nuevaActualizacion"></textarea>
+<button id="btnAgregarActualizacion">Agregar</button>
+<div id="listaActualizaciones"></div>
+
+</div>
+</div>
+
+<script type="module">
+import { db, auth } from "./firebase.js";
+import { onAuthStateChanged, signOut }
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import {
+  collection, addDoc, getDocs, doc, getDoc,
+  updateDoc, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import {
+  getStorage, ref, uploadBytes, getDownloadURL
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+
+const storage = getStorage();
+let contratoId = null;
+
+/* AUTH */
+onAuthStateChanged(auth,u=>{
+  if(!u) location.href="login.html";
+  cargar();
+});
+
+btnLogout.onclick = async()=>{
+  await signOut(auth);
+  location.href="login.html";
+};
+
+btnGuardar.onclick = async()=>{
+  await addDoc(collection(db,"contratos"),{
+    numeroContrato:numeroContrato.value,
+    proveedor:proveedor.value,
+    fechaVencimiento:fechaVencimiento.value,
+    estado:estado.value,
+    observaciones:observaciones.value,
+    createdAt:serverTimestamp()
+  });
+  cargar();
+};
+
+async function cargar(){
+  tabla.innerHTML="";
+  const snap=await getDocs(collection(db,"contratos"));
+  snap.forEach(d=>{
+    const c=d.data();
+    tabla.innerHTML+=`
+      <tr onclick="editar('${d.id}')">
+        <td>${c.numeroContrato}</td>
+        <td>${c.proveedor}</td>
+        <td>${c.fechaVencimiento}</td>
+        <td>${c.estado}</td>
+      </tr>`;
+  });
+}
+
+window.editar=async(id)=>{
+  contratoId=id;
+  modalEditar.classList.add("activo");
+  const snap=await getDoc(doc(db,"contratos",id));
+  const c=snap.data();
+  editEstado.value=c.estado;
+  editObservaciones.value=c.observaciones||"";
+  cargarArchivos();
+};
+
+btnCerrarModal.onclick=()=>modalEditar.classList.remove("activo");
+
+btnGuardarEdicion.onclick = async()=>{
+  await updateDoc(doc(db,"contratos",contratoId),{
+    estado:editEstado.value,
+    observaciones:editObservaciones.value
+  });
+  contratoId = null;
+  modalEditar.classList.remove("activo");
+  cargar();
+};
+
+
+btnSubirArchivo.onclick=async()=>{
+  const f=archivoAdjunto.files[0];
+  if(!f) return alert("Seleccioná archivo");
+  const refS=ref(storage,`contratos/${contratoId}/${Date.now()}_${f.name}`);
+  await uploadBytes(refS,f);
+  const url=await getDownloadURL(refS);
+  await addDoc(collection(db,"contratos",contratoId,"adjuntos"),{
+    nombre:f.name,url,fecha:serverTimestamp()
+  });
+  cargarArchivos();
+};
+
+async function cargarArchivos(){
+  listaArchivos.innerHTML="";
+  const snap=await getDocs(collection(db,"contratos",contratoId,"adjuntos"));
+  snap.forEach(d=>{
+    const a=d.data();
+    listaArchivos.innerHTML+=`
+      <div class="archivo">
+        📎 <a href="${a.url}" target="_blank">${a.nombre}</a>
+      </div>`;
+  });
+}
+</script>
+
+</body>
+</html>
