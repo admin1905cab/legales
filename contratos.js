@@ -1,13 +1,3 @@
-const archivoAdjunto = document.getElementById("archivoAdjunto");
-const listaArchivos = document.getElementById("listaArchivos");
-
-const nuevaActualizacion = document.getElementById("nuevaActualizacion");
-const listaActualizaciones = document.getElementById("listaActualizaciones");
-
-const modalEditar = document.getElementById("modalEditar");
-const editEstado = document.getElementById("editEstado");
-const editObservaciones = document.getElementById("editObservaciones");
-
 import { db, storage } from "./firebase.js";
 
 import {
@@ -25,6 +15,18 @@ import {
   uploadBytes,
   getDownloadURL
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+
+const archivoAdjunto = document.getElementById("archivoAdjunto");
+const listaArchivos = document.getElementById("listaArchivos");
+
+const nuevaActualizacion = document.getElementById("nuevaActualizacion");
+const listaActualizaciones = document.getElementById("listaActualizaciones");
+
+const modalEditar = document.getElementById("modalEditar");
+const editEstado = document.getElementById("editEstado");
+const editObservaciones = document.getElementById("editObservaciones");
+
+
 
 
 const numeroContrato = document.getElementById("numeroContrato");
