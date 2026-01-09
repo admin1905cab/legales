@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Login – Legales</title>
+
+<style>
+:root{
+  --bg:#f2f4f7;
+  --card:#ffffff;
+  --text:#1f2933;
+  --muted:#6b7280;
+  --primary:#1e88e5;
+  --border:#e5e7eb;
+}
+
+*{ box-sizing:border-box }
+
+body{
+  margin:0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.card{
+  background:var(--card);
+  width:100%;
+  max-width:420px;
+  padding:32px;
+  border-radius:14px;
+  box-shadow:0 20px 40px rgba(0,0,0,.08);
+  text-align:center;
+}
+
+/* LOGO */
+.logo{
+  margin-bottom:18px;
+}
+.logo img{
+  max-width:220px;   /* 🔥 LOGO MÁS GRANDE */
+  width:100%;
+  height:auto;
+}
+
+/* TEXTOS */
+h1{
+  font-size:22px;
+  margin:6px 0 4px;
+}
+
+.subtitle{
+  font-size:13px;
+  color:var(--muted);
+  margin-bottom:22px;
+}
+
+/* FORM */
+.field{
+  margin-bottom:14px;
+}
+
+input{
+  width:100%;
+  padding:11px 12px;
+  border-radius:8px;
+  border:1px solid var(--border);
+  font-size:14px;
+}
+
+input:focus{
+  outline:none;
+  border-color:var(--primary);
+}
+
+button{
+  width:100%;
+  margin-top:12px;
+  background:var(--primary);
+  color:#fff;
+  border:none;
+  border-radius:8px;
+  padding:11px;
+  font-size:15px;
+  cursor:pointer;
+}
+button:hover{ opacity:.9 }
+
+.footer{
+  margin-top:18px;
+  font-size:12px;
+  color:var(--muted);
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+
+  <!-- LOGO CLUB -->
+  <div class="logo">
+    <img src="CAB2.png" alt="Club Atlético Belgrano">
+  </div>
+
+  <h1>Legales</h1>
+  <div class="subtitle">Sistema de gestión jurídica</div>
+
+  <div class="field">
+    <input type="email" id="email" placeholder="Correo electrónico">
+  </div>
+
+  <div class="field">
+    <input type="password" id="password" placeholder="Contraseña">
+  </div>
+
+  <button onclick="login()">Ingresar</button>
+
+  <div class="footer">
+    Acceso restringido · Club Atlético Belgrano
+  </div>
+
+</div>
+
+<script type="module">
+import { auth } from "./firebase.js";
+import {
+  signInWithEmailAndPassword,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+// Si ya está logueado → dashboard
+onAuthStateChanged(auth, user => {
+  if (user) {
+    window.location.href = "dashboard.html";
+  }
+});
+
+// función global para el botón
+window.login = async () => {
+  try {
+    await signInWithEmailAndPassword(
+      auth,
+      email.value,
+      password.value
+    );
+    // NO redirigir acá
+  } catch (e) {
+    alert("Credenciales incorrectas");
+  }
+};
+</script>
+
+
+</body>
+</html>
