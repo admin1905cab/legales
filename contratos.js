@@ -1,3 +1,13 @@
+const archivoAdjunto = document.getElementById("archivoAdjunto");
+const listaArchivos = document.getElementById("listaArchivos");
+
+const nuevaActualizacion = document.getElementById("nuevaActualizacion");
+const listaActualizaciones = document.getElementById("listaActualizaciones");
+
+const modalEditar = document.getElementById("modalEditar");
+const editEstado = document.getElementById("editEstado");
+const editObservaciones = document.getElementById("editObservaciones");
+
 import { db, storage } from "./firebase.js";
 
 import {
