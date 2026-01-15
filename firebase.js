@@ -9,7 +9,7 @@ const firebaseConfig = {
   apiKey: "AIzaSyAFeygq1iMdSE7A9y6MK7PpTH0US6TULlY",
   authDomain: "legales-cab.firebaseapp.com",
   projectId: "legales-cab",
-  storageBucket: "legales-cab.appspot.com",
+  storageBucket: "legales-cab.firebasestorage.app", // ✅ CORRECTO
   messagingSenderId: "329260025484",
   appId: "1:329260025484:web:30752d0864cc78db7f1da9"
 };
@@ -28,3 +28,4 @@ const storage = getStorage(app);
 
 // Exportamos servicios
 export { auth, db, storage };
+

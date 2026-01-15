@@ -174,6 +174,42 @@ label{
   color:var(--muted);
   margin-bottom:4px;
 }
+
+/* ===== ACTUALIZACIONES MODAL ===== */
+  .actualizacion {
+    border-left: 3px solid #1e88e5;
+    padding: 8px 12px;
+    margin-bottom: 10px;
+    background: #f9fafb;
+    border-radius: 4px;
+  }
+
+  .actualizacion-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: #374151;
+  }
+
+  .fecha {
+    font-size: 12px;
+    color: #6b7280;
+  }
+
+  .actualizacion-texto {
+    margin-top: 4px;
+  }
+
+  .archivo button {
+  margin-left: 8px;
+  background: #e11d48;
+  border: none;
+  border-radius: 4px;
+  padding: 2px 6px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
 </style>
 </head>
 
@@ -326,27 +362,7 @@ label{
 </div>
 
 
-
-<script type="module">
-let contratoActualId = null;
-const modal = document.getElementById("modalEditar");
-const btnCerrarModal = document.getElementById("btnCerrarModal");
-const tabla = document.getElementById("tabla");
-
-// ABRIR MODAL al hacer click en una fila
-tabla.addEventListener("click", (e) => {
-  const fila = e.target.closest("tr");
-  if (!fila) return;
-
-  modal.classList.add("activo");
-});
-
-// CERRAR MODAL
-btnCerrarModal.addEventListener("click", () => {
-  modal.classList.remove("activo");
-});
-</script>
-
+<script type="module" src="auth.js"></script>
 <script type="module" src="dashboard.js"></script>
 <script type="module" src="contratos.js"></script>
 

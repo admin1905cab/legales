@@ -10,6 +10,9 @@ import {
 // proteger acceso
 protegerPagina();
 
+document.getElementById("btnLogout")
+  .addEventListener("click", logout);
+
 // eventos UI
 btnLogout.onclick = logout;
 

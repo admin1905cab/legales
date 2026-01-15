@@ -1,10 +1,11 @@
-import { db, storage } from "./firebase.js";
+import { auth, db, storage } from "./firebase.js";
 
 import {
   collection,
   addDoc,
   getDocs,
   doc,
+  deleteDoc,
   getDoc,
   updateDoc,
   serverTimestamp
@@ -13,7 +14,8 @@ import {
 import {
   ref,
   uploadBytes,
-  getDownloadURL
+  getDownloadURL,
+  deleteObject
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
 const archivoAdjunto = document.getElementById("archivoAdjunto");
@@ -26,9 +28,6 @@ const modalEditar = document.getElementById("modalEditar");
 const editEstado = document.getElementById("editEstado");
 const editObservaciones = document.getElementById("editObservaciones");
 
-
-
-
 const numeroContrato = document.getElementById("numeroContrato");
 const proveedor = document.getElementById("proveedor");
 const fechaVencimiento = document.getElementById("fechaVencimiento");
@@ -37,7 +36,19 @@ const estado = document.getElementById("estado");
 const observaciones = document.getElementById("observaciones");
 const tipoContrato = document.getElementById("tipoContrato");
 
+const btnCerrarModal = document.getElementById("btnCerrarModal");
+
+btnCerrarModal.addEventListener("click", cerrarModal);
+
+
+
 const tabla = document.getElementById("tabla");
+
+function obtenerPathDesdeURL(url) {
+  const decoded = decodeURIComponent(url);
+  const match = decoded.match(/\/o\/(.+)\?/);
+  return match ? match[1] : null;
+}
 
 
 export async function agregarActualizacion() {
@@ -49,10 +60,14 @@ export async function agregarActualizacion() {
   const texto = nuevaActualizacion.value.trim();
   if (!texto) return;
 
+  const user = auth.currentUser;
+
   await addDoc(
     collection(db, "contratos", contratoSeleccionadoId, "actualizaciones"),
     {
       texto,
+      usuario: user?.displayName || user?.email || "Usuario desconocido",
+      uid: user?.uid || null,
       fecha: serverTimestamp()
     }
   );
@@ -132,6 +147,7 @@ export async function cargarContratos() {
       <td>${vencimiento.toLocaleDateString()}</td>
       <td>${estadoVisual}</td>
       <td>${c.observaciones || "-"}</td>
+      <button onclick="eliminarContrato(event, '${d.id}')">🗑</button>
     `;
 
     tr.onclick = () => abrirModalEdicion(d.id);
@@ -143,20 +159,33 @@ export async function cargarContratos() {
 // ==============================
 // ABRIR MODAL CON DATOS
 // ==============================
-async function abrirModalEdicion(id){
-  contratoSeleccionadoId = id;
-  cargarActualizaciones();
+let modalAbierto = false;
 
-  const snap = await getDoc(doc(db,"contratos",id));
+async function abrirModalEdicion(id) {
+
+  // 🛑 EVITA DOBLE EJECUCIÓN
+  if (modalAbierto && contratoSeleccionadoId === id) return;
+
+  modalAbierto = true;
+  contratoSeleccionadoId = id;
+
+  // 🧹 LIMPIAR SIEMPRE
+  listaArchivos.innerHTML = "";
+  listaActualizaciones.innerHTML = "";
+
+  const snap = await getDoc(doc(db, "contratos", id));
   const c = snap.data();
 
   editEstado.value = c.estado;
   editObservaciones.value = c.observaciones || "";
 
   modalEditar.classList.add("activo");
-  cargarAdjuntos();
 
+  await cargarAdjuntos();
+  await cargarActualizaciones();
 }
+
+
 
 // ==============================
 // GUARDAR EDICIÓN
@@ -175,7 +204,8 @@ export async function guardarEdicion(){
     }
   );
 
-  modalEditar.classList.remove("activo");
+  cerrarModal();
+
   cargarContratos();
 }
 
@@ -189,48 +219,55 @@ export async function cargarActualizaciones() {
   snap.forEach(d => {
     const a = d.data();
 
+    const fecha = a.fecha?.toDate
+      ? a.fecha.toDate().toLocaleString("es-AR")
+      : "";
+
     listaActualizaciones.innerHTML += `
       <div class="actualizacion">
-        📝 ${a.texto}
+        <div class="actualizacion-header">
+          <strong>${a.usuario || "Sin usuario"}</strong>
+          <span class="fecha">${fecha}</span>
+        </div>
+        <div class="actualizacion-texto">
+          ${a.texto}
+        </div>
       </div>
     `;
   });
 }
 
+
 export async function subirAdjunto() {
-  if (!contratoSeleccionadoId) {
-    alert("No hay contrato seleccionado");
-    return;
-  }
+  if (!contratoSeleccionadoId) return;
 
   const file = archivoAdjunto.files[0];
-  if (!file) {
-    alert("Seleccioná un archivo");
-    return;
-  }
+  if (!file) return;
 
-  // 📤 Subir a Storage
-  const storageRef = ref(
-    storage,
-    `contratos/${contratoSeleccionadoId}/${Date.now()}_${file.name}`
-  );
+  const nombreArchivo = `${Date.now()}_${file.name}`;
+  const path = `contratos/${contratoSeleccionadoId}/${nombreArchivo}`;
+
+  const storageRef = ref(storage, path);
 
   await uploadBytes(storageRef, file);
   const url = await getDownloadURL(storageRef);
 
-  // 🗂 Guardar referencia en Firestore
   await addDoc(
     collection(db, "contratos", contratoSeleccionadoId, "adjuntos"),
     {
       nombre: file.name,
       url,
-      fecha: serverTimestamp()
+      path, // 🔑 IMPORTANTE
+      fecha: serverTimestamp(),
+      usuario: auth.currentUser.email,
+      uid: auth.currentUser.uid
     }
   );
 
   archivoAdjunto.value = "";
   cargarAdjuntos();
 }
+
 
 export async function cargarAdjuntos() {
   listaArchivos.innerHTML = "";
@@ -244,8 +281,78 @@ export async function cargarAdjuntos() {
 
     listaArchivos.innerHTML += `
       <div class="archivo">
-        📎 <a href="${a.url}" target="_blank">${a.nombre}</a>
-      </div>
+    📎 <a href="${a.url}" target="_blank">${a.nombre}</a>
+      <button onclick="eliminarAdjunto('${d.id}', '${a.path || ""}', '${a.url}')">
+      🗑
+      </button>
+    </div>
     `;
+
   });
+}
+
+window.eliminarContrato = async function (e, id) {
+  e.stopPropagation(); // ⛔ evita que se dispare el click de la fila
+
+  const confirmar = confirm("¿Seguro que querés eliminar este registro?");
+
+  if (!confirmar) return;
+
+  try {
+    await deleteDoc(doc(db, "contratos", id));
+    alert("Registro eliminado");
+    cargarContratos();
+  } catch (error) {
+    console.error(error);
+    alert("Error al eliminar");
+  }
+};
+
+window.subirAdjunto = subirAdjunto;
+
+
+window.eliminarAdjunto = async function (idAdjunto, path, url) {
+  const confirmar = confirm("¿Eliminar este adjunto?");
+  if (!confirmar) return;
+
+  try {
+    let filePath = path;
+
+    // 🟡 Adjuntos viejos: obtener path desde la URL
+    if (!filePath && url) {
+      filePath = obtenerPathDesdeURL(url);
+    }
+
+    if (!filePath) {
+      throw new Error("No se pudo determinar la ruta del archivo");
+    }
+
+    // 1️⃣ Eliminar de Storage
+    const storageRef = ref(storage, filePath);
+    await deleteObject(storageRef);
+
+    // 2️⃣ Eliminar de Firestore
+    await deleteDoc(
+      doc(db, "contratos", contratoSeleccionadoId, "adjuntos", idAdjunto)
+    );
+
+    // 3️⃣ Refrescar lista
+    cargarAdjuntos();
+
+  } catch (error) {
+    console.error("Error al eliminar adjunto:", error);
+    alert("No se pudo eliminar el archivo");
+  }
+};
+
+function cerrarModal() {
+  modalEditar.classList.remove("activo");
+
+  // 🔄 Reset de estado (CLAVE)
+  contratoSeleccionadoId = null;
+  modalAbierto = false;
+
+  // 🧹 Limpieza visual
+  listaArchivos.innerHTML = "";
+  listaActualizaciones.innerHTML = "";
 }
