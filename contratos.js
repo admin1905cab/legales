@@ -95,7 +95,11 @@ export async function guardarContrato() {
   });
 
   cargarContratos();
+
+  // 🔥 limpiar formulario al guardar
+  limpiarFormularioContrato();
 }
+
 
 
 // ==============================
@@ -353,6 +357,23 @@ function cerrarModal() {
   modalAbierto = false;
 
   // 🧹 Limpieza visual
+  listaArchivos.innerHTML = "";
+  listaActualizaciones.innerHTML = "";
+}
+
+function limpiarFormularioContrato() {
+  numeroContrato.value = "";
+  proveedor.value = "";
+  area.value = "";
+  tipoContrato.value = "";
+  fechaVencimiento.value = "";
+  estado.value = "";
+  observaciones.value = "";
+
+  // limpiar adjuntos
+  archivoAdjunto.value = "";
+
+  // limpiar listas visuales
   listaArchivos.innerHTML = "";
   listaActualizaciones.innerHTML = "";
 }

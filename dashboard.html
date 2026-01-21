@@ -210,6 +210,19 @@ label{
   font-size: 12px;
 }
 
+th, td {
+  border-right: 1px solid #e5e7eb;
+}
+
+td:nth-child(4) {
+  background: #ecfeff;
+  font-weight: 600;
+}
+
+tr:hover td {
+  background-color: #f1f5f9;
+}
+
 </style>
 </head>
 
@@ -272,6 +285,7 @@ label{
     <option>Administración</option>
     <option>Finanzas</option>
     <option>RRHH</option>
+    <option>Sistemas</option>
     <option>Otra</option>
     </select>
     </div>
@@ -342,7 +356,7 @@ label{
 
 <div class="section">
   <h4>📎 Documentación adjunta</h4>
-  <input type="file" id="archivoAdjunto" accept=".pdf,.png,.jpg,.jpeg">
+  <input type="file" id="archivoAdjunto" accept=".pdf,.png,.jpg,.jpeg,.doc,.docx">
   <button id="btnSubirArchivo">Subir archivo</button>
   <div id="listaArchivos"></div>
 </div>
